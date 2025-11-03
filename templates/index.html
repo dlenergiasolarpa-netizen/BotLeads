@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BotLeads - Sistema de busca de leads no Google Maps">
+    <title>BotLeads - Busca de Leads no Google Maps</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='img/BotLeadsLogo.png') }}" alt="BotLeads Logo" class="logo-image">
+                    <h1 class="logo">
+                        <span class="logo-bot">Bot</span><span class="logo-leads">Leads</span>
+                    </h1>
+                </div>
+                <p class="tagline">Sistema de Busca de Leads no Google Maps</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Parâmetros de Busca</h2>
+                        <p class="card-subtitle">Preencha os dados para buscar leads</p>
+                    </div>
+                    
+                    <form id="searchForm" class="form">
+                        <div class="form-group">
+                            <label for="estado" class="label">
+                                <span class="label-text">Estado *</span>
+                            </label>
+                            <div class="searchbox-container">
+                                <input 
+                                    type="text" 
+                                    id="estado" 
+                                    name="estado" 
+                                    class="input searchbox-input" 
+                                    placeholder="Digite para buscar o estado (ex: Pará, São Paulo)"
+                                    autocomplete="off"
+                                    required
+                                >
+                                <div class="autocomplete-dropdown" id="estadoDropdown"></div>
+                            </div>
+                            <input type="hidden" id="estado_id" name="estado_id">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="municipio" class="label">
+                                <span class="label-text">Município *</span>
+                            </label>
+                            <div class="searchbox-container">
+                                <input 
+                                    type="text" 
+                                    id="municipio" 
+                                    name="municipio" 
+                                    class="input searchbox-input" 
+                                    placeholder="Selecione primeiro um estado"
+                                    autocomplete="off"
+                                    required
+                                    disabled
+                                >
+                                <div class="autocomplete-dropdown" id="municipioDropdown"></div>
+                            </div>
+                            <input type="hidden" id="municipio_id" name="municipio_id">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bairro" class="label">
+                                <span class="label-text">Bairro</span>
+                                <small class="label-optional">(opcional)</small>
+                            </label>
+                            <div class="searchbox-container">
+                                <input 
+                                    type="text" 
+                                    id="bairro" 
+                                    name="bairro" 
+                                    class="input searchbox-input" 
+                                    placeholder="Selecione um município para buscar bairros (deixe em branco para buscar no município inteiro)"
+                                    autocomplete="off"
+                                    disabled
+                                >
+                                <div class="autocomplete-dropdown" id="bairroDropdown"></div>
+                            </div>
+                            <small class="help-text">Deixe em branco para buscar em todo o município</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo" class="label">
+                                <span class="label-text">Tipo de Estabelecimento *</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="tipo" 
+                                name="tipo" 
+                                class="input" 
+                                placeholder="Ex: mercado, loja de roupa, padaria"
+                                required
+                            >
+                            <small class="help-text">(ex: mercado, loja de roupa, padaria)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input 
+                                    type="checkbox" 
+                                    id="apenas_com_telefone" 
+                                    name="apenas_com_telefone"
+                                    class="checkbox-input"
+                                    checked
+                                >
+                                <span class="checkbox-text">
+                                    <strong>Filtrar apenas estabelecimentos com telefone</strong>
+                                </span>
+                            </label>
+                            <small class="help-text">Se marcado, retorna apenas estabelecimentos que possuem número de contato</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="searchBtn">
+                                <span class="btn-icon">🔍</span>
+                                <span class="btn-text">Buscar Leads</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="clearBtn">
+                                <span class="btn-icon">🗑️</span>
+                                <span class="btn-text">Limpar</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="results-header">
+                            <h2>Resultados da Busca</h2>
+                            <div class="results-header-actions">
+                                <div class="results-count" id="resultsCount"></div>
+                                <button type="button" class="btn btn-export" id="exportBtn" style="display: none;">
+                                    <span class="btn-icon">📊</span>
+                                    <span class="btn-text">Exportar para Excel</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="loading" id="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Buscando leads...</p>
+                    </div>
+
+                    <div class="error-message" id="errorMessage" style="display: none;"></div>
+
+                    <div class="leads-container" id="leadsContainer"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 BotLeads - Sistema de Busca de Leads</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/autocomplete.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
+
