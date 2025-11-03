@@ -20,6 +20,8 @@ class Lead:
     latitude: float
     longitude: float
     tipo: str
+    fonte: str = "Google Maps"  # Fonte: Google Maps, Facebook, Instagram
+    link_perfil: Optional[str] = None  # Link para perfil na fonte
 
 
 class GoogleMapsSearcher:
@@ -242,7 +244,9 @@ class GoogleMapsSearcher:
                 telefone=telefone,
                 latitude=location.get('lat', 0),
                 longitude=location.get('lng', 0),
-                tipo=tipo_busca
+                tipo=tipo_busca,
+                fonte="Google Maps",
+                link_perfil=place.get('url') or f"https://www.google.com/maps/place/?q=place_id:{place_id}"
             )
             
             return lead

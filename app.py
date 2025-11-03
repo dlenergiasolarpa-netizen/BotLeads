@@ -1,5 +1,5 @@
 """
-Aplicação Flask para busca de leads no Google Maps
+Aplicação Flask para busca de leads no Google Maps, Facebook e Instagram
 """
 from flask import Flask, render_template, request, jsonify, send_file
 from flask_cors import CORS
@@ -13,20 +13,47 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from dotenv import load_dotenv
 
+# Tenta importar os buscadores de Facebook e Instagram (opcionais)
+try:
+    from facebook_searcher import FacebookSearcher
+    FACEBOOK_AVAILABLE = True
+except ImportError:
+    FACEBOOK_AVAILABLE = False
+    
+try:
+    from instagram_searcher import InstagramSearcher
+    INSTAGRAM_AVAILABLE = True
+except ImportError:
+    INSTAGRAM_AVAILABLE = False
+
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Inicializa o buscador uma única vez
-searcher = None
+# Inicializa os buscadores uma única vez
+google_searcher = None
+facebook_searcher = None
+instagram_searcher = None
 
-def get_searcher():
+def get_searcher(source="google"):
     """Obtém ou cria a instância do buscador"""
-    global searcher
-    if searcher is None:
-        searcher = GoogleMapsSearcher()
-    return searcher
+    global google_searcher, facebook_searcher, instagram_searcher
+    
+    if source == "google":
+        if google_searcher is None:
+            google_searcher = GoogleMapsSearcher()
+        return google_searcher
+    elif source == "facebook" and FACEBOOK_AVAILABLE:
+        if facebook_searcher is None:
+            facebook_searcher = FacebookSearcher()
+        return facebook_searcher
+    elif source == "instagram" and INSTAGRAM_AVAILABLE:
+        if instagram_searcher is None:
+            instagram_searcher = InstagramSearcher()
+        return instagram_searcher
+    else:
+        return None
 
 
 @app.route('/')
@@ -37,7 +64,7 @@ def index():
 
 @app.route('/api/buscar', methods=['POST'])
 def buscar_leads():
-    """Endpoint para buscar leads"""
+    """Endpoint para buscar leads em múltiplas fontes"""
     try:
         data = request.get_json()
         
@@ -47,6 +74,7 @@ def buscar_leads():
         bairro = (data.get('bairro') or '').strip() or None  # Opcional
         tipo_busca = (data.get('tipo') or '').strip()
         apenas_com_telefone = data.get('apenas_com_telefone', False)  # Checkbox
+        fontes = data.get('fontes', ['google'])  # Fontes selecionadas, padrão: Google
         
         # Validações
         if not estado:
@@ -58,15 +86,33 @@ def buscar_leads():
         if not tipo_busca:
             return jsonify({'erro': 'O campo Tipo de estabelecimento é obrigatório'}), 400
         
-        # Busca os leads
-        buscador = get_searcher()
-        leads = buscador.buscar_leads(
-            estado=estado,
-            municipio=municipio,
-            bairro=bairro,
-            tipo_busca=tipo_busca,
-            apenas_com_telefone=apenas_com_telefone
-        )
+        # Se não especificar fontes, usa apenas Google
+        if not fontes or len(fontes) == 0:
+            fontes = ['google']
+        
+        # Coleta leads de todas as fontes selecionadas
+        todos_leads = []
+        erros = []
+        
+        for fonte in fontes:
+            try:
+                buscador = get_searcher(source=fonte)
+                if buscador is None:
+                    erros.append(f"Fonte '{fonte}' não disponível")
+                    continue
+                
+                leads = buscador.buscar_leads(
+                    estado=estado,
+                    municipio=municipio,
+                    bairro=bairro,
+                    tipo_busca=tipo_busca,
+                    apenas_com_telefone=apenas_com_telefone
+                )
+                todos_leads.extend(leads)
+                
+            except Exception as e:
+                erros.append(f"Erro ao buscar em {fonte}: {str(e)}")
+                continue
         
         # Converte leads para dicionário
         leads_dict = [
@@ -76,15 +122,18 @@ def buscar_leads():
                 'telefone': lead.telefone or 'N/A',
                 'latitude': lead.latitude,
                 'longitude': lead.longitude,
-                'tipo': lead.tipo
+                'tipo': lead.tipo,
+                'fonte': lead.fonte,
+                'link_perfil': lead.link_perfil or 'N/A'
             }
-            for lead in leads
+            for lead in todos_leads
         ]
         
         return jsonify({
             'sucesso': True,
             'total': len(leads_dict),
-            'leads': leads_dict
+            'leads': leads_dict,
+            'aviso': '; '.join(erros) if erros else None
         })
         
     except Exception as e:
@@ -315,7 +364,7 @@ def exportar_excel():
         ws.title = "Leads"
         
         # Define cabeçalhos
-        headers = ['Nome', 'Endereço', 'Telefone', 'Latitude', 'Longitude', 'Tipo']
+        headers = ['Nome', 'Endereço', 'Telefone', 'Latitude', 'Longitude', 'Tipo', 'Fonte', 'Link']
         header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         header_font = Font(color="FFFFFF", bold=True, size=12)
         
@@ -335,13 +384,15 @@ def exportar_excel():
             ws.cell(row=row_num, column=4, value=lead.get('latitude', ''))
             ws.cell(row=row_num, column=5, value=lead.get('longitude', ''))
             ws.cell(row=row_num, column=6, value=lead.get('tipo', ''))
+            ws.cell(row=row_num, column=7, value=lead.get('fonte', 'Google Maps'))
+            ws.cell(row=row_num, column=8, value=lead.get('link_perfil', 'N/A'))
             
             # Formata células de coordenadas como número
             ws.cell(row=row_num, column=4).number_format = '0.000000'
             ws.cell(row=row_num, column=5).number_format = '0.000000'
         
         # Ajusta largura das colunas
-        column_widths = [30, 50, 20, 15, 15, 20]
+        column_widths = [30, 50, 20, 15, 15, 20, 15, 50]
         for col_num, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(col_num)].width = width
         

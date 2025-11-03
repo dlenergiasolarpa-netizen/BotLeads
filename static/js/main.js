@@ -39,12 +39,19 @@ document.addEventListener('DOMContentLoaded', function() {
             municipio: document.getElementById('municipio').value.trim(),
             bairro: document.getElementById('bairro').value.trim() || null,
             tipo: document.getElementById('tipo').value.trim(),
-            apenas_com_telefone: document.getElementById('apenas_com_telefone').checked
+            apenas_com_telefone: document.getElementById('apenas_com_telefone').checked,
+            fontes: Array.from(document.querySelectorAll('input[name="fontes"]:checked')).map(cb => cb.value)
         };
         
         // Validações adicionais
         if (!formData.estado || !formData.municipio || !formData.tipo) {
             showError('Por favor, preencha todos os campos obrigatórios (Estado, Município e Tipo de estabelecimento).');
+            return;
+        }
+        
+        // Valida se pelo menos uma fonte foi selecionada
+        if (formData.fontes.length === 0) {
+            showError('Por favor, selecione pelo menos uma fonte de busca (Google Maps, Facebook ou Instagram).');
             return;
         }
         
@@ -122,9 +129,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const card = document.createElement('div');
         card.className = 'lead-card';
         
+        // Define ícone e cor da fonte
+        const fonteIcon = lead.fonte === 'Facebook' ? '📘' : lead.fonte === 'Instagram' ? '📷' : '🗺️';
+        const fonteClass = lead.fonte ? `fonte-${lead.fonte.toLowerCase().replace(' ', '-')}` : '';
+        
         card.innerHTML = `
             <div class="lead-header">
-                <div class="lead-number">Lead #${number}</div>
+                <div class="lead-number ${fonteClass}">Lead #${number}</div>
                 <h3 class="lead-name">${escapeHtml(lead.nome)}</h3>
             </div>
             <div class="lead-info">
@@ -148,17 +159,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="lead-label">Tipo:</span>
                     <span class="lead-value">${escapeHtml(lead.tipo)}</span>
                 </div>
+                <div class="lead-item">
+                    <span class="lead-icon">${fonteIcon}</span>
+                    <span class="lead-label">Fonte:</span>
+                    <span class="lead-value">${escapeHtml(lead.fonte || 'Google Maps')}</span>
+                </div>
             </div>
             <div class="lead-actions">
-                <a 
-                    href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.latitude + ',' + lead.longitude)}" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="btn btn-small btn-outline"
-                >
-                    <span class="btn-icon">🗺️</span>
-                    Ver no Maps
-                </a>
+                ${lead.link_perfil && lead.link_perfil !== 'N/A' ? `
+                    <a 
+                        href="${lead.link_perfil}" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="btn btn-small btn-outline"
+                    >
+                        <span class="btn-icon">🔗</span>
+                        Ver ${lead.fonte === 'Facebook' ? 'Facebook' : lead.fonte === 'Instagram' ? 'Instagram' : 'Perfil'}
+                    </a>
+                ` : ''}
+                ${lead.latitude && lead.longitude && (lead.latitude !== 0 || lead.longitude !== 0) ? `
+                    <a 
+                        href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.latitude + ',' + lead.longitude)}" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="btn btn-small btn-outline"
+                    >
+                        <span class="btn-icon">🗺️</span>
+                        Ver no Maps
+                    </a>
+                ` : ''}
                 ${lead.telefone && lead.telefone !== 'N/A' ? `
                     <a 
                         href="tel:${lead.telefone.replace(/\s/g, '')}" 
