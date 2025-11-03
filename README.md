@@ -190,19 +190,24 @@ BotLeads/
 ├── interface.py             # Interface gráfica desktop (GUI)
 ├── main.py                  # Script linha de comando
 ├── requirements.txt         # Dependências do projeto
+├── vercel.json              # Configuração para deploy na Vercel
 ├── templates/               # Templates HTML
 │   └── index.html          # Página principal web
 ├── static/                  # Arquivos estáticos
 │   ├── css/
 │   │   └── style.css       # Estilos CSS
 │   ├── js/
-│   │   └── main.js         # JavaScript
-│   └── img/                 # Imagens
+│   │   ├── main.js         # JavaScript principal
+│   │   └── autocomplete.js # Autocomplete IBGE
+│   └── img/
+│       └── BotLeadsLogo.png # Logo
 ├── instalar_dependencias.ps1 # Script de instalação automática
 ├── env.example              # Exemplo de configuração
 ├── .env                     # Arquivo de configuração (não versionado)
 ├── .gitignore              # Arquivos ignorados pelo git
 ├── INSTALACAO.md           # Guia detalhado de instalação
+├── CONECTAR_GITHUB.md      # Guia para conectar ao GitHub
+├── DEPLOY_VERCEL.md        # Guia para deploy na Vercel
 └── README.md               # Este arquivo
 ```
 
@@ -261,3 +266,26 @@ git commit -m "Sua mensagem aqui"
 git push
 ```
 
+## 🚀 Deploy na Vercel
+
+Para fazer deploy em produção na Vercel:
+
+1. Consulte o arquivo `DEPLOY_VERCEL.md` para instruções detalhadas
+2. Conecte seu repositório GitHub à Vercel
+3. Configure a variável de ambiente `GOOGLE_MAPS_API_KEY`
+4. Deploy automático!
+
+**Setup rápido:**
+- Acesse [vercel.com](https://vercel.com)
+- Importar repositório do GitHub
+- Configure `GOOGLE_MAPS_API_KEY` nas Environment Variables
+- Deploy!
+
+**Vantagens do deploy na Vercel:**
+- ✅ HTTPS automático
+- ✅ CDN global
+- ✅ Deploy automático a cada push
+- ✅ Domínio `.vercel.app` grátis
+- ✅ Interface responsiva funcionando perfeitamente
+
+## Observações
