@@ -1,6 +1,6 @@
-# BotLeads - Busca de Leads no Google Maps 🤖
+# BotLeads - Busca de Leads Multiplataforma 🤖
 
-Sistema para buscar leads de estabelecimentos comerciais no Google Maps baseado em parâmetros geográficos.
+Sistema para buscar leads de estabelecimentos comerciais em Google Maps, Facebook e Instagram baseado em parâmetros geográficos.
 
 ## 🎨 Design
 
@@ -11,23 +11,32 @@ Sistema para buscar leads de estabelecimentos comerciais no Google Maps baseado 
 
 ## Funcionalidades
 
-- Busca estabelecimentos no Google Maps por:
+- 🗺️ **Busca em Múltiplas Fontes**:
+  - Google Maps (obrigatório)
+  - Facebook (opcional)
+  - Instagram (opcional)
+
+- 📍 **Parâmetros de Busca**:
   - Estado
   - Município
   - Bairro
   - Raio de busca (em metros)
   - Tipo de estabelecimento (mercado, loja de roupa, etc.)
 
-- Retorna informações do lead:
+- 📊 **Informações Retornadas**:
   - Nome do estabelecimento
   - Endereço completo
   - Telefone de contato
+  - Link do perfil na rede social
+  - Localização GPS
+  - Fonte do lead (Google/Facebook/Instagram)
 
 ## Requisitos
 
 - Python 3.7+
 - Conta Google Cloud com Places API habilitada
-- Chave de API do Google Maps
+- Chave de API do Google Maps (obrigatória)
+- Facebook Access Token (opcional, para buscar no Facebook/Instagram)
 
 ## Instalação
 
@@ -116,9 +125,11 @@ A interface web inclui:
 - ✨ Design moderno e totalmente responsivo
 - 📱 Layout adaptável para mobile, tablet e desktop
 - 🔍 Busca em tempo real com autocomplete
-- 📊 Visualização organizada dos resultados
+- 🌐 Busca em múltiplas plataformas (Google Maps, Facebook, Instagram)
+- 📊 Visualização organizada dos resultados com indicador de fonte
 - 🗺️ Links diretos para Google Maps
 - 📞 Links para ligação direta
+- 🔗 Links para perfis nas redes sociais
 - 📥 Exportação para Excel dos resultados
 - 🎨 Paleta de cores BotLeads (Verde, Azul Ciano, Cinza Escuro)
 
@@ -185,7 +196,9 @@ Tipo: mercado
 
 ```
 BotLeads/
-├── google_maps_searcher.py  # Módulo principal de busca
+├── google_maps_searcher.py  # Buscador Google Maps
+├── facebook_searcher.py     # Buscador Facebook
+├── instagram_searcher.py    # Buscador Instagram
 ├── app.py                   # Aplicação Flask (versão web)
 ├── interface.py             # Interface gráfica desktop (GUI)
 ├── main.py                  # Script linha de comando
@@ -208,6 +221,7 @@ BotLeads/
 ├── INSTALACAO.md           # Guia detalhado de instalação
 ├── CONECTAR_GITHUB.md      # Guia para conectar ao GitHub
 ├── DEPLOY_VERCEL.md        # Guia para deploy na Vercel
+├── COMO_OBTER_TOKEN_FACEBOOK.md # Como obter token Facebook/Instagram
 └── README.md               # Este arquivo
 ```
 
@@ -234,10 +248,16 @@ BotLeads/
 **Erro: "Places API not enabled"**
 - Habilite a Places API no Google Cloud Console
 
+**Erro: "Facebook Access Token não encontrado"**
+- Facebook/Instagram são opcionais
+- Se quiser usar, consulte `COMO_OBTER_TOKEN_FACEBOOK.md`
+- Configure `FACEBOOK_ACCESS_TOKEN` no `.env`
+
 **Nenhum resultado encontrado**
 - Verifique se o endereço está correto
 - Tente aumentar o raio de busca
 - Confirme que o tipo de busca está bem escrito
+- Verifique se selecionou pelo menos uma fonte de busca
 
 **Dúvidas sobre instalação?**
 - Consulte o arquivo `INSTALACAO.md` para um guia mais detalhado
