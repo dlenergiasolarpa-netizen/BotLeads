@@ -1,6 +1,13 @@
-# BotLeads - Busca de Leads no Google Maps
+# BotLeads - Busca de Leads no Google Maps 🤖
 
 Sistema para buscar leads de estabelecimentos comerciais no Google Maps baseado em parâmetros geográficos.
+
+## 🎨 Design
+
+- ✨ Interface moderna e responsiva
+- 📱 Totalmente otimizado para dispositivos móveis
+- 🎨 Paleta de cores customizada
+- 🤖 Logo personalizado BotLeads
 
 ## Funcionalidades
 
@@ -106,12 +113,14 @@ http://localhost:5000
 ```
 
 A interface web inclui:
-- ✨ Design moderno e responsivo
-- 📱 Layout adaptável para mobile
-- 🔍 Busca em tempo real
+- ✨ Design moderno e totalmente responsivo
+- 📱 Layout adaptável para mobile, tablet e desktop
+- 🔍 Busca em tempo real com autocomplete
 - 📊 Visualização organizada dos resultados
 - 🗺️ Links diretos para Google Maps
 - 📞 Links para ligação direta
+- 📥 Exportação para Excel dos resultados
+- 🎨 Paleta de cores BotLeads (Verde, Azul Ciano, Cinza Escuro)
 
 ### Interface Gráfica (Desktop)
 
@@ -227,4 +236,28 @@ BotLeads/
 
 **Dúvidas sobre instalação?**
 - Consulte o arquivo `INSTALACAO.md` para um guia mais detalhado
+
+## 📦 GitHub
+
+Este projeto está versionado com Git. Para conectar ao GitHub e fazer push do código:
+
+1. Consulte o arquivo `CONECTAR_GITHUB.md` para instruções detalhadas
+2. Crie um repositório no GitHub
+3. Conecte o repositório local ao remoto
+4. Faça push do código
+
+**Comandos rápidos:**
+```bash
+# Ver status do repositório
+git status
+
+# Adicionar mudanças
+git add .
+
+# Fazer commit
+git commit -m "Sua mensagem aqui"
+
+# Enviar para GitHub
+git push
+```
 
